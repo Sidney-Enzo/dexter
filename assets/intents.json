@@ -1,0 +1,101 @@
+{
+    "intents": [
+        {
+            "tag": "fallback",
+            "speech": [""]
+        },
+        {
+            "tag": "greetings",
+            "speech": [
+                "Hi.",
+                "Hey.",
+                "Hello.",
+                "What's up?",
+                "Good day."
+            ]
+        },
+        {
+            "tag": "thanks",
+            "speech": [
+                "Thanks",
+                "Thank you.",
+                "That's helpful.",
+                "Thank you a lot.",
+                "Thank you so much",
+                "Thanks a lot!",
+                "I appreciate it.",
+                "I am grateful."
+            ]
+        },
+        {
+            "tag": "weather",
+            "speech": [
+                "What's the weather like?",
+                "Can you tell me about the weather?",
+                "How's the weather today?"
+            ]
+        },
+        {
+            "tag": "time",
+            "speech": [
+                "What time is it?",
+                "Can you tell me the current time?",
+                "What time do you have?"
+            ]
+        },
+        {
+            "tag": "day",
+            "speech": [
+                "What day is it today?",
+                "Can you tell me the date?",
+                "What is today's date?"
+            ]
+        },
+        {
+            "tag": "exit",
+            "speech": [
+                "Turn off.",
+                "Bye bye.",
+                "Goodbye.",
+                "Good night."
+            ]
+        },
+        {
+            "tag": "browser",
+            "speech": [
+                "Open the web browser.",
+                "Open the navigator"
+            ]
+        }
+    ],
+    "replies": {
+        "fallback": [
+            "I'm sorry, I couldn't understand you. Can you repeat, please?",
+            "Can you say that again, please?"
+        ],
+        "exit": [
+            "Goodbye, sir.",
+            "See you soon."
+        ],
+        "greetings": [
+            "Hello, sir! Good day!",
+            "Hi, sir! How can I help you?",
+            "Good day! How may I assist you?"
+        ],
+        "thanks": [
+            "Happy to help!",
+            "You're welcome!",
+            "My pleasure!"
+        ],
+        "browser": [
+            "Yes, sir!",
+            "Okay, opening browser"
+        ],
+        "time": [
+            "It is currently %I:%M %p."
+        ],
+        "day": [
+            "Today is %A, %B %d, %Y."
+        ]
+    }
+}

@@ -1,0 +1,6 @@
+SpeechRecognition
+deep_translator
+pyttsx3
+PyAudio
+nltk
+numpy
