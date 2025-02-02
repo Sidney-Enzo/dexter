@@ -1,0 +1,18 @@
+# Unreleased [0.0.5]
+
+## Added
+ - weather feature
+ - location feature
+ - time and day feature
+ - Open browser
+
+ - Custom ignore words in the ai training
+ - Not listed words in training log
+ - Dropout in 0.3
+ - Dexter face
+ - Ai thread
+
+## Changes
+ - Ai modularization
+ - Dataset balanced
+ - Hyper parameters changed (epochs: 100, learning rate 0.0002)

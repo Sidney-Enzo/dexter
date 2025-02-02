@@ -1,117 +1,124 @@
-import os
-import asyncio
+import pygame, pyttsx3
 import json
-import random
-import webbrowser
+import numpy as np
+from random import randint
+from threading import Thread
+from virtualassistant import VirtualAssistant
 
-import python_weather
-from datetime import datetime
-
-from modules import voice
-from modules.speech_recgonizer import capture_voice_input, convert_voice_to_text
-
-import torch
-from utils.model import NeuralNet
-from utils.nltk_utils import bag_of_words, tokenize
-
-from deep_translator import GoogleTranslator
-
-
-INPUT_LANG = 'en-US'
-OUTPUT_LANG = 'en'
-# OUTPUT_PRONOUNS = 'he/him'
+ASSISTENT_NAMES = {'d', 'dex', 'dexter', 'daddy'}
 MODEL_FILE = 'model.pth'
-BOT_LANG = 'en'
-BOT_NAMES = [ 'dex', 'dexter', 'daddy' ]
+CONFIDENCE_THERESHOLD = 0.75
+running = True
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-with open('assets/intents.json') as file:
-    intents = json.load(file)
+class TTSThread(Thread):
+    def __init__(self):
+        super().__init__()
+        self.tts_engine = pyttsx3.init()
+        self.voices = self.tts_engine.getProperty('voices')
+        self.set_voice(1)
+        self.tts_engine.runAndWait()
 
-data = torch.load(MODEL_FILE, weights_only=True)
-
-input_size = data["input_size"]
-hidden_size = data["hidden_size"]
-output_size = data["output_size"]
-all_words = data["all_words"]
-tags = data["tags"]
-model_state = data["model_state"]
-
-model = NeuralNet(input_size, hidden_size, output_size)
-model.load_state_dict(model_state)
-model.eval()
-
-async def get_weather(city: str) -> str:
-    async with python_weather.Client() as client:
-        weather = await client.get(city)
-        return (f'Today the weather is {weather.description}, '
-                f'temperatures in {weather.temperature}Cº, '
-                f'the wind speed is {weather.wind_speed}km/h '
-                f'and the air humidity is in {weather.humidity}%.')
-
-async def main() -> None:
-    voice.set_voice(0)
-    voice.set_voice_rate(160)
-    voice.set_voice_volume(1.0)
+        with open('assets/intents.json') as file:
+            intents = json.load(file)
     
-    while True:
-        voice_audio = capture_voice_input()
-        text_format = convert_voice_to_text(voice_audio, INPUT_LANG).lower()
-        # try:
-        #     text_format = input('You: ').lower()
-        # except (EOFError, KeyboardInterrupt):
-        #     break
+        self.ai = VirtualAssistant(ASSISTENT_NAMES, MODEL_FILE, intents["replies"], lang='pt-BR')
 
-        if not any((name in text_format) for name in BOT_NAMES):
-            continue
+        self.daemon = True
+        self.start()
 
-        translated_text = GoogleTranslator(source='auto', target=BOT_LANG).translate(text_format)
-        # print('You:', translated_text)
+    def run(self):
+        global running
 
-        tokenized_text = tokenize(translated_text)
-        input_tensor = bag_of_words(tokenized_text, all_words)
-        input_tensor = input_tensor.reshape(1, input_tensor.shape[0])
-        input_tensor = torch.from_numpy(input_tensor)
+        self.tts_engine.startLoop(False)
+        while running:
+            if not self.is_speaking():
+                text = self.ai.listen()
+                print('You:', text)
+                # text = input('You: ').lower()
+                if not (text and self.ai.wake_up(text)):
+                    continue
 
-        output = model(input_tensor)
-        _, predict = torch.max(output, dim=1)
-        tag = tags[predict.item()]
-        print(f'Predict: {tag}')
+                tag, probability = self.ai.predict(text)
+                print(
+                    '---Dex woke up---',
+                    f'Predict: {tag}',
+                    f'Confidence thereshold: {(probability*100):.2f}%;',
+                    sep='\n'
+                )
 
-        probabilities = torch.softmax(output, dim=1)
-        probabilit = probabilities[0][predict.item()]
-        print(f'Confidence thereshold: {(probabilit*100):.2f}%')
+                if probability < CONFIDENCE_THERESHOLD:
+                    tag = 'fallback'
 
-        if probabilit.item() < 0.75:
-            answer = random.choice(intents["replies"]["fallback"])
-            answer = GoogleTranslator(source='auto', target=OUTPUT_LANG).translate(answer)
-            print('Dexter:', answer)
-            voice.speak(answer)
-            continue
+                self.speak(self.ai.speech(tag))
+                if tag == 'exit':
+                    running = False
+            
+            while not running: # finish speech before exit
+                self.tts_engine.iterate()
+            
+            self.tts_engine.iterate()
 
-        match tag:
-            case 'exit':
-                answer = random.choice(intents["replies"][tag])
-                answer = GoogleTranslator(source='auto', target=OUTPUT_LANG).translate(answer)
-                print('Dexter:', answer)
-                voice.speak(answer)
-                break
-            case 'time' | 'day':
-                answer = datetime.now().strftime(random.choice(intents["replies"][tag]))
-            case 'weather':
-                answer = await get_weather('Lisbon')
-            case 'browser':
-                answer = random.choice(intents["replies"][tag])
-                webbrowser.open('http://google.co.kr', new=2)
-            case _:
-                answer = random.choice(intents["replies"][tag])
+        self.tts_engine.endLoop()
+
+    def set_voice(self, voice_id: int) -> None:
+        if not (0 <= voice_id < len(self.voices)):
+            raise IndexError(f'Voice {voice_id} does not exist')
         
-        answer = GoogleTranslator(source='auto', target=OUTPUT_LANG).translate(answer)
-        print('Dexter:', answer)
-        voice.speak(answer)
+        self.tts_engine.setProperty('voice', self.voices[voice_id].id)
+        self.tts_engine.runAndWait() # process events event if the engine looping is not running
 
-if __name__ == "__main__":
-    if os.name == 'nt':
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    def set_voice_volume(self, volume: float) -> None:
+        self.tts_engine.setProperty('volume', volume)
+        self.tts_engine.runAndWait()
+    
+    def set_voice_rate(self, rate: int) -> None:
+        self.tts_engine.setProperty('rate', rate)
+        self.tts_engine.runAndWait()
+    
+    def speak(self, text: str) -> None:
+        self.tts_engine.say(text)
+    
+    def is_speaking(self) -> bool:
+        return self.tts_engine.isBusy()
 
-    asyncio.run(main())
+def draw_wave_line(window: pygame.surface, amplitude: int, color: tuple[int], position: tuple[int], width: int) -> None:
+    wave_line = [
+        (position[0], position[1]),
+        (position[0] + width, position[1])
+    ]
+    if amplitude >= 5:
+        wave_line = [(position[0] + x, position[1] + amplitude*np.sin(x*0.02)) for x in range(width)]
+    
+    pygame.draw.lines(window, color, False, wave_line, 2)
+
+def main() -> None:
+    global running
+    tts_thread = TTSThread()
+
+    pygame.init()
+    window_width, window_height = 860, 640
+    window = pygame.display.set_mode((window_width, window_height))
+    pygame.display.set_caption('Dexter - your own virtual assistent')
+    window_icon = pygame.image.load('assets/icon.jpg')
+    pygame.display.set_icon(window_icon)
+    while running or tts_thread.is_speaking():
+        for event in pygame.event.get():
+            match event.type:
+                case pygame.QUIT:
+                    running = False
+                    tts_thread.speak(None)
+        
+        window.fill('black')
+        amplitude = 0
+        color = (128, 128, 128)
+        if tts_thread.is_speaking():
+            amplitude = randint(0, 64)
+            color = (255, 255, 255)
+        
+        draw_wave_line(window, amplitude, color, (0, window_height//2), window_width)
+        pygame.display.update()
+    
+    pygame.quit()
+
+if __name__ == '__main__':
+    main()

@@ -1,38 +1,63 @@
 {
     "intents": [
         {
-            "tag": "fallback",
-            "speech": [""]
-        },
-        {
             "tag": "greetings",
             "speech": [
                 "Hi.",
                 "Hey.",
                 "Hello.",
                 "What's up?",
-                "Good day."
+                "Good day.",
+                "Howdy!",
+                "Greetings!",
+                "Hello there!",
+                "Hi there!",
+                "Hey, how's it going?"
             ]
         },
         {
             "tag": "thanks",
             "speech": [
-                "Thanks",
+                "Thanks.",
                 "Thank you.",
                 "That's helpful.",
                 "Thank you a lot.",
-                "Thank you so much",
+                "Thank you so much.",
                 "Thanks a lot!",
                 "I appreciate it.",
-                "I am grateful."
+                "I'm grateful.",
+                "Many thanks!",
+                "Thanks for your help."
+            ]
+        },
+        {
+            "tag": "location",
+            "speech": [
+                "Where currently am I?",
+                "What is my location?",
+                "Which city am I?",
+                "What's my GPS location?",
+                "What's this area called?",
+                "Can you tell me my current location?",
+                "Where am I now?",
+                "What place is this?",
+                "Tell me my location.",
+                "Where exactly am I?"
             ]
         },
         {
             "tag": "weather",
             "speech": [
                 "What's the weather like?",
-                "Can you tell me about the weather?",
-                "How's the weather today?"
+                "How's the weather today?",
+                "What's today's weather forecast?",
+                "Is it sunny or rainy today?",
+                "Can you tell me the weather?",
+                "Is it cold outside?",
+                "What's the temperature today?",
+                "Will it rain today?",
+                "Is it hot today?",
+                "How is the weather now?"
             ]
         },
         {
@@ -40,7 +65,14 @@
             "speech": [
                 "What time is it?",
                 "Can you tell me the current time?",
-                "What time do you have?"
+                "What time do you have?",
+                "Do you know the time?",
+                "Tell me the current time.",
+                "What's the time now?",
+                "Can you give me the time?",
+                "What is the time?",
+                "I need to know the time.",
+                "Do you know what time it is?"
             ]
         },
         {
@@ -48,7 +80,14 @@
             "speech": [
                 "What day is it today?",
                 "Can you tell me the date?",
-                "What is today's date?"
+                "What's today's date and day?",
+                "What's the day today?",
+                "What's today's day?",
+                "Can you tell me the day of the week?",
+                "What day is it now?",
+                "Which day is it today?",
+                "What's the current day?",
+                "Is it Monday or Tuesday?"
             ]
         },
         {
@@ -57,45 +96,75 @@
                 "Turn off.",
                 "Bye bye.",
                 "Goodbye.",
-                "Good night."
+                "Good night.",
+                "See you later.",
+                "Catch you later!",
+                "See you soon.",
+                "Take care.",
+                "Bye for now.",
+                "I'm leaving now."
             ]
         },
         {
             "tag": "browser",
             "speech": [
                 "Open the web browser.",
-                "Open the navigator"
+                "Launch the browser.",
+                "Access the internet.",
+                "Open a web page.",
+                "I want to browse the web.",
+                "Can you open the browser?",
+                "Start the browser.",
+                "Can you access the internet for me?",
+                "Please open a browser.",
+                "Open Google Chrome."
             ]
         }
     ],
     "replies": {
         "fallback": [
             "I'm sorry, I couldn't understand you. Can you repeat, please?",
-            "Can you say that again, please?"
+            "Can you say that again, please?",
+            "I didn't catch that. Could you clarify?",
+            "Sorry, I didn't understand that.",
+            "Can you rephrase your question?"
         ],
         "exit": [
             "Goodbye, sir.",
-            "See you soon."
+            "See you soon.",
+            "Have a nice day!",
+            "Take care and goodbye.",
+            "Bye! Have a great day."
         ],
         "greetings": [
             "Hello, sir! Good day!",
             "Hi, sir! How can I help you?",
-            "Good day! How may I assist you?"
+            "Good day! How may I assist you?",
+            "Hello there! What can I do for you?",
+            "Hi! How can I assist you today?"
         ],
         "thanks": [
             "Happy to help!",
             "You're welcome!",
-            "My pleasure!"
+            "My pleasure!",
+            "No problem at all.",
+            "Glad I could help!"
         ],
         "browser": [
             "Yes, sir!",
-            "Okay, opening browser"
+            "Okay, opening the browser.",
+            "Launching your web browser now.",
+            "Starting the browser as requested."
         ],
         "time": [
-            "It is currently %I:%M %p."
+            "It is currently %I:%M %p.",
+            "The current time is %I:%M %p.",
+            "Right now, it's %I:%M %p."
         ],
         "day": [
-            "Today is %A, %B %d, %Y."
+            "Today is %A, %B %d, %Y.",
+            "The date today is %A, %B %d, %Y.",
+            "It's %A, %B %d, %Y today."
         ]
     }
 }

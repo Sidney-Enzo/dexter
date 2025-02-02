@@ -1,6 +1,9 @@
 SpeechRecognition
 deep_translator
 pyttsx3
+pygame
 PyAudio
 nltk
 numpy
+torch
+python_weather
