@@ -1,26 +1,42 @@
-import pygame, pyttsx3
+import pygame
+
+from elevenlabs import stream, Voice, VoiceSettings
+from elevenlabs.client import ElevenLabs
+
 import json
 import numpy as np
 from random import randint
+
 from threading import Thread
+
+from conf import * # here is where the api key is hidden
+import modules.speech_recognizer as sr
 from virtualassistant import VirtualAssistant
+
+MODEL = 'eleven_multilingual_v2'
+
+client = ElevenLabs(api_key=API_KEY)
+VOICE = Voice(
+    voice_id=VOICE_ID,
+    settings=VoiceSettings(
+        stability=1,
+        similarity_boost= 0.75
+    )
+)
 
 ASSISTENT_NAMES = {'d', 'dex', 'dexter', 'daddy'}
 MODEL_FILE = 'model.pth'
 CONFIDENCE_THERESHOLD = 0.75
+
 running = True
 
 class TTSThread(Thread):
     def __init__(self):
         super().__init__()
-        self.tts_engine = pyttsx3.init()
-        self.voices = self.tts_engine.getProperty('voices')
-        self.set_voice(1)
-        self.tts_engine.runAndWait()
-
         with open('assets/intents.json') as file:
             intents = json.load(file)
-    
+        
+        self.speaking = False
         self.ai = VirtualAssistant(ASSISTENT_NAMES, MODEL_FILE, intents["replies"], lang='pt-BR')
 
         self.daemon = True
@@ -29,57 +45,40 @@ class TTSThread(Thread):
     def run(self):
         global running
 
-        self.tts_engine.startLoop(False)
         while running:
-            if not self.is_speaking():
-                text = self.ai.listen()
-                print('You:', text)
-                # text = input('You: ').lower()
-                if not (text and self.ai.wake_up(text)):
-                    continue
+            text = self.ai.listen()
+            print('You:', text)
+            # text = input('You: ').lower()
+            if not (text and self.ai.wake_up(text)):
+                continue
 
-                tag, probability = self.ai.predict(text)
-                print(
-                    '---Dex woke up---',
-                    f'Predict: {tag}',
-                    f'Confidence thereshold: {(probability*100):.2f}%;',
-                    sep='\n'
-                )
+            tag, probability = self.ai.predict(text)
+            print(
+                '---Dex woke up---',
+                f'Predict: {tag}',
+                f'Confidence thereshold: {(probability*100):.2f}%;',
+                sep='\n'
+            )
 
-                if probability < CONFIDENCE_THERESHOLD:
-                    tag = 'fallback'
+            if probability < CONFIDENCE_THERESHOLD:
+                tag = 'fallback'
 
-                self.speak(self.ai.speech(tag))
-                if tag == 'exit':
-                    running = False
-            
-            while not running: # finish speech before exit
-                self.tts_engine.iterate()
-            
-            self.tts_engine.iterate()
-
-        self.tts_engine.endLoop()
-
-    def set_voice(self, voice_id: int) -> None:
-        if not (0 <= voice_id < len(self.voices)):
-            raise IndexError(f'Voice {voice_id} does not exist')
-        
-        self.tts_engine.setProperty('voice', self.voices[voice_id].id)
-        self.tts_engine.runAndWait() # process events event if the engine looping is not running
-
-    def set_voice_volume(self, volume: float) -> None:
-        self.tts_engine.setProperty('volume', volume)
-        self.tts_engine.runAndWait()
-    
-    def set_voice_rate(self, rate: int) -> None:
-        self.tts_engine.setProperty('rate', rate)
-        self.tts_engine.runAndWait()
+            self.speak(self.ai.speech(tag))
+            if tag == 'exit':
+                running = False
     
     def speak(self, text: str) -> None:
-        self.tts_engine.say(text)
+        audio_stream = client.generate(
+            text=text,
+            voice=VOICE
+        )
+
+        self.speaking = True # TEMPORARY
+        stream(audio_stream)
+        self.speaking = False
     
     def is_speaking(self) -> bool:
-        return self.tts_engine.isBusy()
+        return self.speaking
 
 def draw_wave_line(window: pygame.surface, amplitude: int, color: tuple[int], position: tuple[int], width: int) -> None:
     wave_line = [
@@ -96,17 +95,16 @@ def main() -> None:
     tts_thread = TTSThread()
 
     pygame.init()
+    window_icon = pygame.image.load('assets/icon.jpg')
     window_width, window_height = 860, 640
     window = pygame.display.set_mode((window_width, window_height))
     pygame.display.set_caption('Dexter - your own virtual assistent')
-    window_icon = pygame.image.load('assets/icon.jpg')
     pygame.display.set_icon(window_icon)
     while running or tts_thread.is_speaking():
         for event in pygame.event.get():
             match event.type:
                 case pygame.QUIT:
                     running = False
-                    tts_thread.speak(None)
         
         window.fill('black')
         amplitude = 0

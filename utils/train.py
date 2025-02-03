@@ -7,7 +7,7 @@ from torch.utils.data import Dataset, DataLoader
 
 import numpy as np
 
-from nltk_utils import stem, tokenize, bag_of_words
+from nltk_utils import stem, tokenize, bag_of_words, stopwords
 from model import NeuralNet
 
 # load training data
@@ -30,13 +30,14 @@ for intent in training_dataset["intents"]:
         xy.append((words, tag))
 
     if (len(xy) % 5) == 0:
-        print(f'Listing dataset: {len(xy)}/{len(training_dataset["intents"])}')
+        print(f'Listing dataset: {len(xy)}')
 
-ignore_words = list(string.punctuation) + ["the", "is", "a", "an", "and", "or"]
+ignore_words = list(string.punctuation) #+ stopwords.words('english')
 all_words = [stem(word.lower()) for word in all_words if word not in ignore_words]
 all_words = sorted(set(all_words))
 tags = sorted(set(tags))
 print("Dataset listed")
+print(all_words)
 
 x_train = []
 y_train = []
@@ -44,7 +45,7 @@ for (pattern, tag) in xy:
     # Normalize pattern words
     normalized_pattern = [stem(word.lower()) for word in pattern if word not in ignore_words]
     
-    for word in pattern:
+    for word in normalized_pattern:
         if not word in all_words:
             print(f'word: "{word}" is not in the vocabulary')
 

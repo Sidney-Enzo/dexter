@@ -16,3 +16,11 @@
  - Ai modularization
  - Dataset balanced
  - Hyper parameters changed (epochs: 100, learning rate 0.0002)
+
+### 02-03-2025
+
+## Added
+ - Own Ai voice
+
+## Changed
+ - pyttsx3 switched by elevenlabs

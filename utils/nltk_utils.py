@@ -1,7 +1,8 @@
 import nltk
-import numpy as np
 from nltk.stem.porter import PorterStemmer
-from nltk.sentiment import SentimentIntensityAnalyzer
+from nltk.corpus import stopwords
+
+import numpy as np
 
 # Check if 'punkt' is loaded
 try:
@@ -12,17 +13,13 @@ except LookupError:
     nltk.download('punkt_tab')
 
 try:
-    nltk.data.find('sentiment/vader_lexicon.zip')
-    print("The 'vader_lexicon' sentiment analizator is already loaded!")
+    nltk.data.find('corpora/stopwords.zip')
+    print("The 'stopwords' dataset is already loaded!")
 except LookupError:
-    print("The 'vader_lexicon' sentiment analizator is not loaded. Downloading now...")
-    nltk.download('vader_lexicon')
+    print("The 'stopwords' dataset is not loaded. Downloading now...")
+    nltk.download('stopwords')
 
-sentiment_analizator = SentimentIntensityAnalyzer()
 stemmer = PorterStemmer()
-
-def analyse_sentiment(text: str) -> dict:
-    return sentiment_analizator.polarity_scores(text)
 
 def tokenize(s: str) -> list[str]:
     return nltk.word_tokenize(s) 
@@ -39,3 +36,6 @@ def bag_of_words(tokenized: list[str], all_words: list[str]):
             bag[i] = 1.0
 
     return bag
+
+if __name__ == '__main__':
+    print(sorted(stopwords.words('english')))

@@ -35,14 +35,14 @@
             "speech": [
                 "Where currently am I?",
                 "What is my location?",
-                "Which city am I?",
+                "Which city am i",
                 "What's my GPS location?",
                 "What's this area called?",
                 "Can you tell me my current location?",
-                "Where am I now?",
+                "Where am i now?",
                 "What place is this?",
                 "Tell me my location.",
-                "Where exactly am I?"
+                "Where exactly am i?"
             ]
         },
         {
@@ -144,11 +144,11 @@
             "Hi! How can I assist you today?"
         ],
         "thanks": [
-            "Happy to help!",
-            "You're welcome!",
-            "My pleasure!",
+            "Happy to help.",
+            "You're welcome.",
+            "My pleasure.",
             "No problem at all.",
-            "Glad I could help!"
+            "Glad I could help."
         ],
         "browser": [
             "Yes, sir!",
